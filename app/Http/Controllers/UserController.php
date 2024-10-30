@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth; //ini blm ditambahin, harusnya ada di materi yg ada di discord
 
 class UserController extends Controller
 {
@@ -36,8 +37,8 @@ class UserController extends Controller
             [
                 'nama' => 'required|max:128',
                 'pekerjaan' => 'required|max:50',
-                'alamat'=> 'required|max:255',
-                'email' => 'required|unique:users,email,'.$request ->email
+                'alamat' => 'required|max:255',
+                'email' => 'required|unique:users,email,' . $request->email
             ],
             [
                 // Berfungsi untuk custom pesan error/validasi
@@ -60,9 +61,7 @@ class UserController extends Controller
             'password' => $request->password,
         ]);
 
-        return response()->json(['success' =>'Data berhasil disimpan']);
-
-
+        return response()->json(['success' => 'Data berhasil disimpan']);
     }
 
     /**
@@ -82,12 +81,11 @@ class UserController extends Controller
         $checkUser = User::find($id);
 
         // Jika data user ada / ditemukan
-        if($checkUser){
+        if ($checkUser) {
 
             // Hapus user
             User::destroy($id);
-            return response()->json
-            (['success' => true]);
+            return response()->json(['success' => true]);
         }
     }
 
@@ -112,9 +110,9 @@ class UserController extends Controller
                     'email',
                     Rule::unique('users', 'email')->ignore($request->id),
 
+                ],
             ],
-        ],
-        [
+            [
                 // Berfungsi untuk custom pesan error
                 'e_nama.required' => 'Nama wajib diisi!',
                 'e_nama.max' => 'Nama maksimal 128 karakter!',
@@ -127,87 +125,88 @@ class UserController extends Controller
             ]
         );
 
-        $getPass = User::where('id',$request->id)->first();
+        $getPass = User::where('id', $request->id)->first();
 
-            User::where('id', $request->id)->update([
-                'nama' => $request->e_nama,
-                'pekerjaan' => $request->e_pekerjaan,
-                'alamat' => $request->e_alamat,
-                'email' => $request->e_email,
-                'password' => $request->e_password != '' ? Hash::make($request->e_password) : $getPass->password,
-                
-            ]);
+        User::where('id', $request->id)->update([
+            'nama' => $request->e_nama,
+            'pekerjaan' => $request->e_pekerjaan,
+            'alamat' => $request->e_alamat,
+            'email' => $request->e_email,
+            'password' => $request->e_password != '' ? Hash::make($request->e_password) : $getPass->password,
 
-            return response()->json(['success' => 'Post created successfuly.']);
-        }
-        public function profile(Request $request)
-        {
-            $data = [
-                'title' => 'Website Pertamaku',
-                'home' => 'Home',
-                'menu' => 'Pengaturan',
-                'submenu' => 'Profile',
-                'titleSubmenu' => 'Data Profile',
-                'users' => User::find(Auth::user()->id),
-            ];
+        ]);
 
-            return view('setting.profile', $data);
-        }
+        return response()->json(['success' => 'Post created successfuly.']);
+    }
+    public function profile(Request $request)
+    {
+        $data = [
+            'title' => 'Website Pertamaku',
+            'home' => 'Home',
+            'menu' => 'Pengaturan',
+            'submenu' => 'Profile',
+            'titleSubmenu' => 'Data Profile',
+            'users' => User::find(Auth::user()->id),
+        ];
 
-        public function register()
-        {
-            $data = [
-                'title' => 'Website Pertamaku',
-                'home' => 'Home',
-                'menu' => 'Register',
-                'submenu' => 'Register',
-                'titleSubmenu' => 'Register'
-            ];
+        return view('setting.profile', $data);
+    }
 
-            return view('register', $data);
-        }
+    public function register()
+    {
+        $data = [
+            'title' => 'Website Pertamaku',
+            'home' => 'Home',
+            'menu' => 'Register',
+            'submenu' => 'Register',
+            'titleSubmenu' => 'Register'
+        ];
 
-        public function register_user(request $request)
-        {
-            $request->validate(
-                [
-                    'nama' => 'required|max:128',
-                    'email' => 'required|unique:users,email,'.  $request->email,
-                    'password' => 'required|min:6',
-                ],
-                [
-                    // Berfungsi untuk custom pesan error
-                    'nama.required' => 'Nama wajib diisi!',
-                    'nama.max' => 'Nama maksimal 128 karakter!',
-                    'email.required' => 'Email wajib diisi!',
-                    'email.unique' => 'Email sudah terdaftar!',
-                    'password.required' => 'Password wajib diisi!',
-                    'password.min' => 'password minimal 6 karakter!',
-                ]
-            );
+        return view('register', $data);
+    }
 
-            User::create([
-                'nama' => $request->nama,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
+    public function register_user(request $request)
+    {
+        $request->validate(
+            [
+                'nama' => 'required|max:128',
+                'email' => 'required|unique:users,email,' .  $request->email,
+                'password' => 'required|min:6',
+            ],
+            [
+                // Berfungsi untuk custom pesan error
+                'nama.required' => 'Nama wajib diisi!',
+                'nama.max' => 'Nama maksimal 128 karakter!',
+                'email.required' => 'Email wajib diisi!',
+                'email.unique' => 'Email sudah terdaftar!',
+                'password.required' => 'Password wajib diisi!',
+                'password.min' => 'password minimal 6 karakter!',
+            ]
+        );
 
-            return response()->json(['success' => 'Post created successfully.']);
-        }
+        User::create([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-        public function login(Request $request)
-        {
-            $data = [
-                'submenu' => 'Login'
-            ];
+        return response()->json(['success' => 'Post created successfully.']);
+    }
 
-            return view('login', $data);
-        }
+    public function login(Request $request)
+    {
+        $data = [
+            'submenu' => 'Login'
+        ];
 
-        public function login_user(Request $request)
-        {
-            $validate = $request->validate([
-                'email' => ['required','email'],
+        return view('login', $data);
+    }
+
+    public function login_user(Request $request)
+    {
+        $validate = $request->validate(
+            [
+                'email' => ['required', 'email'],
                 'password' => ['required'],
             ],
             [
@@ -216,11 +215,12 @@ class UserController extends Controller
                 'email.unique' => 'Email sudah terdaftar!',
                 'email.email' => 'Format Email Salah!',
                 'password.required' => 'Password wajib diisi!',
-            ]);
+            ]
+        );
 
         if (Auth::Attempt($validate)) {
             return response()->json(['success' => ['message' => 'Berhasil Login']], 200);
-        }else{
+        } else {
             return response()->json(['errors' => ['message' => 'Email atau password salah.']], 404);
         }
     }
