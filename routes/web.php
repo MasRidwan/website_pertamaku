@@ -22,26 +22,30 @@ use App\Http\Controllers\UserController;
 Route::prefix('/user')
     ->middleware(['auth'])
     ->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('user.index');
-    Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
-    Route::get('/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
-    Route::get('/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
-    Route::get('/', [UserController::class, 'store'])->name('user.store');
-    Route::get('/update', [UserController::class, 'update'])->name('user.update');
-    Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+        Route::get('/', [UserController::class, 'index'])->name('user.index');
+        Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+        Route::get('/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
+        Route::get('/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+
+        // ini harusnya post 
+        Route::post('/', [UserController::class, 'store'])->name('user.store');
+        // ini harusnya post 
+        Route::post('/update', [UserController::class, 'update'])->name('user.update');
     });
 
 Route::prefix('/register')
     ->middleware(['guest'])
     ->group(function () {
-    Route::get('/', [UserController::class, 'register'])->name('user.register');
-    Route::post('/register_user', [UserController::class, 'register_user'])->name('user.register_user');
+        Route::get('/', [UserController::class, 'register'])->name('user.register');
+        Route::post('/register_user', [UserController::class, 'register_user'])->name('user.register_user');
     });
 
 Route::middleware(['guest'])
     ->group(function () {
-    Route::get('/', [UserController::class, 'login'])->name('login');
-    Route::get('/login_user', [UserController::class, 'login_user'])->name('login_user');
+        Route::get('/', [UserController::class, 'login'])->name('login');
+
+        // yang ini harusnya post ya wan..
+        Route::post('/login_user', [UserController::class, 'login_user'])->name('login_user');
     });
 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');
